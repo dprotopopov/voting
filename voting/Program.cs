@@ -25,8 +25,14 @@ namespace voting
 
             for (var i = 0; i < args.Length; i++)
             {
-                if (args[i] == "--log") logFileName = args[++i];
-                else if (args[i] == "--tests") numberOfTests = int.Parse(args[++i]);
+                if (args[i] == "--log")
+                {
+                    logFileName = args[++i];
+                }
+                else if (args[i] == "--tests")
+                {
+                    numberOfTests = int.Parse(args[++i]);
+                }
                 else if (args[i] == "--candidates")
                 {
                     minNumberOfCandidates = int.Parse(args[++i]);
