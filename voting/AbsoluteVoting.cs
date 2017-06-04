@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace voting
@@ -32,7 +33,7 @@ namespace voting
                     first = j;
             if (s + s > total)
                 return first;
-            Log.WriteLine("Нахождениечисла саксимального чмсоа голосов отданных за второго кандидата");
+            Log.WriteLine("Нахождениечисла саксимального чисоа голосов отданных за второго кандидата");
             s = 0;
             for (var j = 0; j < matrix.GetLength(1); j++)
                 if (j != first)
@@ -56,6 +57,50 @@ namespace voting
                     return id == 0 ? first : second;
                 }
             }
+        }
+        public int SelectWinnerManual(List<string> canlidates, int[,] matrix)
+        {
+            Log.WriteLine("Нахождение максимального числа голосов отданных за первое место");
+            var s = matrix[0, 0];
+            var total = matrix[0, 0];
+            for (var j = 1; j < matrix.GetLength(1); j++)
+            {
+                s = Math.Max(s, matrix[0, j]);
+                total += matrix[0, j];
+            }
+            Log.WriteLine("Нахождение первого кандидата, набравшего максимальное число голосов");
+            var first = 0;
+            for (var j = 0; j < matrix.GetLength(1); j++)
+                if (matrix[0, j] == s)
+                    first = j;
+            if (s + s > total)
+            {
+                Log.WriteLine("Первый кандидат набрал абсолютное большинство голосов");
+                return first;               
+            }
+            Log.WriteLine("Нахождение максимального числа голосов отданных за второе место");
+            s = 0;
+            for (var j = 0; j < matrix.GetLength(1); j++)
+                if (j != first)
+                {
+                    s = Math.Max(s, matrix[0, j]);
+                }
+            Log.WriteLine("Нахождение второго кандидата, набравшего максимальное число голосов");
+            var second = 0;
+            for (var j = 0; j < matrix.GetLength(1); j++)
+                if (j != first)
+                    if (matrix[0, j] == s)
+                        second = j;
+            Log.WriteLine("Проведение второго тура голосования");
+            Console.WriteLine("Проведение второго тура голосования");
+            Console.Write("Укажите число голосов за кандидата {0}:", canlidates[first]);
+            var voices1 = int.Parse(Console.ReadLine());
+            Console.Write("Укажите число голосов за кандидата {0}:", canlidates[second]);
+            var voices2 = int.Parse(Console.ReadLine());
+            Log.WriteLine(string.Format("Кандидат {0} набрал {1} голосов", canlidates[first], voices1));
+            Log.WriteLine(string.Format("Кандидат {0} набрал {1} голосов", canlidates[second], voices2));
+
+            return (voices1 >= voices2) ? first : second;
         }
 
         public void Dispose()

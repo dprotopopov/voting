@@ -7,7 +7,7 @@ namespace voting
         /// <summary>
         /// Список кандидатов
         /// </summary>
-        public IEnumerable<string> Candidates { get; set; }
+        public List<string> Candidates { get; set; }
 
         /// <summary>
         /// Квадратная матрица голосов за кандидатов

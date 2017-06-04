@@ -22,12 +22,17 @@ namespace voting
             var maxNumberOfCandidates = 10; // Максимальное количество кандидатов
             var minNumberOfVoters = 100; // Минимальное количество выборщиков
             var maxNumberOfVoters = 1000; // Максимальное количество выборщиков
+            bool manual = false;
 
             for (var i = 0; i < args.Length; i++)
             {
                 if (args[i] == "--log")
                 {
                     logFileName = args[++i];
+                }
+                else if (args[i] == "--manual")
+                {
+                    manual = true;
                 }
                 else if (args[i] == "--tests")
                 {
@@ -45,27 +50,20 @@ namespace voting
                 }
             }
 
-            using (var writer = File.CreateText(logFileName)) // Создание файла и открытие потока записи
-            using (var log = new Log(writer)) // Создание объекта логгирования
+            if (manual)
             {
-                var result = new int[4, 4]; // Количество совпадений итогов голосований
-
-                for (var t = 0; t < numberOfTests; t++)
+                using (var writer = File.CreateText(logFileName)) // Создание файла и открытие потока записи
+                using (var log = new Log(writer)) // Создание объекта логгирования
                 {
-                    using (var firstRound = new RandomElection(m_random.Next(minNumberOfVoters, maxNumberOfVoters), m_random, log))
+                    using (var firstRound = new OnlineElection())
                     {
-                        var candidates =
-                            Enumerable.Range(0, m_random.Next(minNumberOfCandidates, maxNumberOfCandidates))
-                                .Select(x => string.Format("Homer-{0}", x))
-                                .ToList();
-                        log.WriteLine(string.Format("Выборы из {0} кандидатов", candidates.Count));
-                        firstRound.Vote(candidates);
-
+                        // Вывод кандидатов
+                        log.WriteLine(string.Format("Кандидаты:{0}{1}{0}", Environment.NewLine, string.Join(Environment.NewLine, firstRound.Candidates)));
                         // Вывод матрицы голосов
                         var sb = new StringBuilder();
-                        for (var i = 0; i < candidates.Count; i++)
+                        for (var i = 0; i < firstRound.Candidates.Count; i++)
                         {
-                            for (var j = 0; j < candidates.Count; j++)
+                            for (var j = 0; j < firstRound.Candidates.Count; j++)
                             {
                                 sb.Append(firstRound.Matrix[i, j]);
                                 sb.Append(',');
@@ -78,49 +76,103 @@ namespace voting
 
                         log.WriteLine("Нахождение победителя методом относительного большинства");
                         using (var voting = new RelativeVoting(log))
-                            list.Add(candidates[voting.SelectWinner(firstRound.Matrix)]);
+                            list.Add(firstRound.Candidates[voting.SelectWinner(firstRound.Matrix)]);
                         log.WriteLine("Нахождение победителя методом абсолютного большинства");
                         using (var voting = new AbsoluteVoting(log))
-                            list.Add(candidates[voting.SelectWinner(firstRound.Matrix)]);
+                            list.Add(firstRound.Candidates[voting.SelectWinnerManual(firstRound.Candidates,firstRound.Matrix)]);
                         log.WriteLine("Нахождение победителя методом минимальной суммы мест");
                         using (var voting = new MinSumVoting(log))
-                            list.Add(candidates[voting.SelectWinner(firstRound.Matrix)]);
+                            list.Add(firstRound.Candidates[voting.SelectWinner(firstRound.Matrix)]);
                         using (var voting = new EthalonVoting(log))
-                            list.Add(candidates[voting.SelectWinner(firstRound.Matrix)]);
+                            list.Add(firstRound.Candidates[voting.SelectWinner(firstRound.Matrix)]);
 
                         log.WriteLine("Победитель:");
                         log.WriteLine(string.Format("Метод относительного большинства: {0}", list[0]));
                         log.WriteLine(string.Format("Метод абсолютного большинства   : {0}", list[1]));
                         log.WriteLine(string.Format("Метод минимальной суммы мест    : {0}", list[2]));
                         log.WriteLine(string.Format("Метод эталонов                  : {0}", list[3]));
+                    }
+                }
+            }
+            else
+            {
+                using (var writer = File.CreateText(logFileName)) // Создание файла и открытие потока записи
+                using (var log = new Log(writer)) // Создание объекта логгирования
+                {
+                    var result = new int[4, 4]; // Количество совпадений итогов голосований
 
-                        // Накопление статистических итогов
-                        for (var i = 0; i < list.Count; i++)
+                    for (var t = 0; t < numberOfTests; t++)
+                    {
+                        using (var firstRound = new RandomElection(m_random.Next(minNumberOfVoters, maxNumberOfVoters), m_random, log))
                         {
-                            for (var j = 0; j < list.Count; j++)
+                            var candidates =
+                                Enumerable.Range(0, m_random.Next(minNumberOfCandidates, maxNumberOfCandidates))
+                                    .Select(x => string.Format("Homer-{0}", x))
+                                    .ToList();
+                            log.WriteLine(string.Format("Выборы из {0} кандидатов", candidates.Count));
+                            firstRound.Vote(candidates);
+
+                            // Вывод матрицы голосов
+                            var sb = new StringBuilder();
+                            for (var i = 0; i < candidates.Count; i++)
                             {
-                                if (list[i] == list[j]) result[i, j]++;
+                                for (var j = 0; j < candidates.Count; j++)
+                                {
+                                    sb.Append(firstRound.Matrix[i, j]);
+                                    sb.Append(',');
+                                }
+                                sb.Append(Environment.NewLine);
+                            }
+                            log.WriteLine(string.Format("Матрица голосования (строка=место,колонка=кандидат):{0}{1}", Environment.NewLine, sb.ToString()));
+
+                            var list = new List<string>(); // Победители по различным методам
+
+                            log.WriteLine("Нахождение победителя методом относительного большинства");
+                            using (var voting = new RelativeVoting(log))
+                                list.Add(candidates[voting.SelectWinner(firstRound.Matrix)]);
+                            log.WriteLine("Нахождение победителя методом абсолютного большинства");
+                            using (var voting = new AbsoluteVoting(log))
+                                list.Add(candidates[voting.SelectWinner(firstRound.Matrix)]);
+                            log.WriteLine("Нахождение победителя методом минимальной суммы мест");
+                            using (var voting = new MinSumVoting(log))
+                                list.Add(candidates[voting.SelectWinner(firstRound.Matrix)]);
+                            using (var voting = new EthalonVoting(log))
+                                list.Add(candidates[voting.SelectWinner(firstRound.Matrix)]);
+
+                            log.WriteLine("Победитель:");
+                            log.WriteLine(string.Format("Метод относительного большинства: {0}", list[0]));
+                            log.WriteLine(string.Format("Метод абсолютного большинства   : {0}", list[1]));
+                            log.WriteLine(string.Format("Метод минимальной суммы мест    : {0}", list[2]));
+                            log.WriteLine(string.Format("Метод эталонов                  : {0}", list[3]));
+
+                            // Накопление статистических итогов
+                            for (var i = 0; i < list.Count; i++)
+                            {
+                                for (var j = 0; j < list.Count; j++)
+                                {
+                                    if (list[i] == list[j]) result[i, j]++;
+                                }
                             }
                         }
                     }
-                }
 
-                var p = new double[4, 4]; // Процент совпадения итогов голосования
-                for (var i = 0; i < 4; i++)
-                {
-                    for (var j = 0; j < 4; j++)
+                    var p = new double[4, 4]; // Процент совпадения итогов голосования
+                    for (var i = 0; i < 4; i++)
                     {
-                        p[i, j] = result[i, j]*100.0/numberOfTests;
+                        for (var j = 0; j < 4; j++)
+                        {
+                            p[i, j] = result[i, j] * 100.0 / numberOfTests;
+                        }
                     }
-                }
 
-                log.WriteLine("Разультаты:");
-                log.WriteLine(string.Format("Совпадение Относительного большинства и Абсолютного большинства : {0}%", p[0, 1]));
-                log.WriteLine(string.Format("Совпадение Относительного большинства и Минимальной суммы мест  : {0}%", p[0, 2]));
-                log.WriteLine(string.Format("Совпадение Абсолютного большинства и Минимальной суммы мест     : {0}%", p[1, 2]));
-                log.WriteLine(string.Format("Совпадение Относительного большинства и Эталонов                : {0}%", p[0, 3]));
-                log.WriteLine(string.Format("Совпадение Абсолютного большинства и Эталонов                   : {0}%", p[1, 3]));
-                log.WriteLine(string.Format("Совпадение Минимальной суммы мест и Эталонов                    : {0}%", p[2, 3]));
+                    log.WriteLine("Разультаты:");
+                    log.WriteLine(string.Format("Совпадение Относительного большинства и Абсолютного большинства : {0}%", p[0, 1]));
+                    log.WriteLine(string.Format("Совпадение Относительного большинства и Минимальной суммы мест  : {0}%", p[0, 2]));
+                    log.WriteLine(string.Format("Совпадение Абсолютного большинства и Минимальной суммы мест     : {0}%", p[1, 2]));
+                    log.WriteLine(string.Format("Совпадение Относительного большинства и Эталонов                : {0}%", p[0, 3]));
+                    log.WriteLine(string.Format("Совпадение Абсолютного большинства и Эталонов                   : {0}%", p[1, 3]));
+                    log.WriteLine(string.Format("Совпадение Минимальной суммы мест и Эталонов                    : {0}%", p[2, 3]));
+                }
             }
         }
     }

@@ -57,7 +57,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RandomElection.cs" />
     <Compile Include="RelativeVoting.cs" />
-    <Compile Include="StoredElection.cs" />
+    <Compile Include="OnlineElection.cs" />
     <Compile Include="VotingAbstract.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

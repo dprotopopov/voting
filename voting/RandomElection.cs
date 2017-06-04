@@ -21,7 +21,7 @@ namespace voting
         {
         }
 
-        public void Vote(IEnumerable<string> candidates)
+        public void Vote(List<string> candidates)
         {
             var count = candidates.Count();
             Candidates = candidates;
