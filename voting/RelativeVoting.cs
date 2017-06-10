@@ -24,8 +24,9 @@ namespace voting
         ///     Квадратная матрица голосов за кандидатов
         ///     Элементу [r,c] соответствует число голосов отданных за место r кандидату c
         /// </param>
+        /// <param name="secondRoundInterface"></param>
         /// <returns></returns>
-        public int SelectWinner(int[,] matrix)
+        public int SelectWinner(int[,] matrix, ISecondRound secondRoundInterface)
         {
             Log.WriteLine("Нахождение максимального числа голосов отданных за первое место");
             var s = matrix[0, 0];

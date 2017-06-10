@@ -9,9 +9,10 @@ namespace voting
         /// Нахождение индекса кандидата - победителя выборов
         /// </summary>
         /// <param name="matrix">Квадратная матрица голосов за кандидатов
-        /// Элементу [r,c] соответствует число голосов отданных за место r кандидату c</param>
+        ///     Элементу [r,c] соответствует число голосов отданных за место r кандидату c</param>
+        /// <param name="secondRoundInterface"></param>
         /// <returns></returns>
-        public int SelectWinner(int[,] matrix)
+        public int SelectWinner(int[,] matrix, ISecondRound secondRoundInterface)
         {
             Log.WriteLine("Расчёт значений сумм мест для кандидатов");
             var s = new int[matrix.GetLength(1)];

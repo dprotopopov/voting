@@ -8,7 +8,7 @@ namespace voting
 {
     internal static class Program
     {
-        public static readonly Random m_random = new Random(); // Генератор псевдослучайных чисео
+        public static readonly Random m_random = new Random(); // Генератор псевдослучайных чисел
 
         /// <summary>
         ///     Главная точка входа для приложения.
@@ -76,15 +76,15 @@ namespace voting
 
                         log.WriteLine("Нахождение победителя методом относительного большинства");
                         using (var voting = new RelativeVoting(log))
-                            list.Add(firstRound.Candidates[voting.SelectWinner(firstRound.Matrix)]);
+                            list.Add(firstRound.Candidates[voting.SelectWinner(firstRound.Matrix, null)]);
                         log.WriteLine("Нахождение победителя методом абсолютного большинства");
                         using (var voting = new AbsoluteVoting(log))
-                            list.Add(firstRound.Candidates[voting.SelectWinnerManual(firstRound.Candidates,firstRound.Matrix)]);
+                            list.Add(firstRound.Candidates[voting.SelectWinner(firstRound.Matrix, firstRound)]);
                         log.WriteLine("Нахождение победителя методом минимальной суммы мест");
                         using (var voting = new MinSumVoting(log))
-                            list.Add(firstRound.Candidates[voting.SelectWinner(firstRound.Matrix)]);
+                            list.Add(firstRound.Candidates[voting.SelectWinner(firstRound.Matrix, null)]);
                         using (var voting = new EthalonVoting(log))
-                            list.Add(firstRound.Candidates[voting.SelectWinner(firstRound.Matrix)]);
+                            list.Add(firstRound.Candidates[voting.SelectWinner(firstRound.Matrix, null)]);
 
                         log.WriteLine("Победитель:");
                         log.WriteLine(string.Format("Метод относительного большинства: {0}", list[0]));
@@ -129,15 +129,15 @@ namespace voting
 
                             log.WriteLine("Нахождение победителя методом относительного большинства");
                             using (var voting = new RelativeVoting(log))
-                                list.Add(candidates[voting.SelectWinner(firstRound.Matrix)]);
+                                list.Add(candidates[voting.SelectWinner(firstRound.Matrix, null)]);
                             log.WriteLine("Нахождение победителя методом абсолютного большинства");
                             using (var voting = new AbsoluteVoting(log))
-                                list.Add(candidates[voting.SelectWinner(firstRound.Matrix)]);
+                                list.Add(candidates[voting.SelectWinner(firstRound.Matrix, firstRound)]);
                             log.WriteLine("Нахождение победителя методом минимальной суммы мест");
                             using (var voting = new MinSumVoting(log))
-                                list.Add(candidates[voting.SelectWinner(firstRound.Matrix)]);
+                                list.Add(candidates[voting.SelectWinner(firstRound.Matrix, null)]);
                             using (var voting = new EthalonVoting(log))
-                                list.Add(candidates[voting.SelectWinner(firstRound.Matrix)]);
+                                list.Add(candidates[voting.SelectWinner(firstRound.Matrix, null)]);
 
                             log.WriteLine("Победитель:");
                             log.WriteLine(string.Format("Метод относительного большинства: {0}", list[0]));
